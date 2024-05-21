@@ -10,6 +10,7 @@ import math
 from pathlib import Path
 import json
 
+import torch.nn.utils as utils
 
 
 
@@ -28,6 +29,11 @@ def train_loop(model,
     Main training loop
     input all the good stuff and get shitty model
     """
+     
+
+
+
+
     scaler = torch.cuda.amp.GradScaler() if device == 'cuda' and use_scaler else None
     #in the beginning i get worst posibble loss - even bad mode lgets saved on first
     best_loss = float('inf') 
@@ -75,7 +81,16 @@ def run_epoch(model, dataloader, optimizer, lr_scheduler, device, scaler, epoch_
     model.train()
 
     current_epoch_loss = 0
+    #optimizer and learning rate scheduler inspired by example torch vision
+    if epoch_id == 0 and is_training:
+        warmup_factor = 1.0 / 1000
+        warmup_iters = min(1000, len(dataloader) - 1)
 
+        lr_scheduler = torch.optim.lr_scheduler.StepLR(
+        optimizer,
+        step_size=100, #TODO finetune
+        gamma=0.9 
+        )
     #cool progress bar in terminal
     progress_bar = tqdm(total=len(dataloader), desc="Train" if is_training else "Eval")
     for batch_id, (images, targets) in enumerate(dataloader):
@@ -117,17 +132,23 @@ def run_epoch(model, dataloader, optimizer, lr_scheduler, device, scaler, epoch_
                 if new_scaler >= old_scaler:
                     lr_scheduler.step()
             else:
+                # Gradient clipping because i kept crashing
+                clip_value = 0.5  #TODO fine tune
                 loss.backward()
-                #optimizer.step()
-                #lr_scheduler.step()
                 
-            #optimizer.zero_grad()
+                
+                utils.clip_grad_value_(model.parameters(), clip_value)
+                optimizer.step()
+                lr_scheduler.step()
+                
+            optimizer.zero_grad()
         
         loss_item = loss.item()
         current_epoch_loss += loss_item
         # Update progress bar
         progress_bar.set_postfix(loss=loss_item, 
                                  avg_loss=current_epoch_loss/(batch_id+1), 
+                                 lr=lr_scheduler.get_last_lr()[0] if is_training else ""
                                  )
         progress_bar.update()
         

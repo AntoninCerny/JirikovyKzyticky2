@@ -38,5 +38,5 @@ def plot_prediction(image_path, prediction):
             ax.plot(x, y, 'bo')  # Blue dot for keypoints
             ax.text(x, y, f'{i}', color='yellow', fontsize=12)  # Optional: Label the keypoints
 
-    #plt.axis('off')
-    #plt.show()
+    plt.axis('off')
+    plt.show()

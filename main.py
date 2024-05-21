@@ -24,7 +24,7 @@ from coreModule import train_loop
 #import plotting module function
 from plotPredictedResultModule import plot_prediction
 
-
+torch.autograd.set_detect_anomaly(True)
 #get device
 #device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 device = get_torch_device()
@@ -44,6 +44,12 @@ keypoint_roi_pooler = torchvision.ops.MultiScaleRoIAlign(featmap_names=['0'],
                                                          output_size=14,
                                                          sampling_ratio=2)
  # put the pieces together inside a KeypointRCNN model
+
+
+
+
+
+
 model = KeypointRCNN(backbone,
                       num_classes=2,
                       num_keypoints=3,
@@ -51,6 +57,17 @@ model = KeypointRCNN(backbone,
                       box_roi_pool=roi_pooler,
                       keypoint_roi_pool=keypoint_roi_pooler)
 
+
+
+
+
+
+anchor_generator = AnchorGenerator(sizes=(32, 64, 128, 256, 512), aspect_ratios=(0.25, 0.5, 0.75, 1.0, 2.0, 3.0, 4.0))
+model = torchvision.models.detection.keypointrcnn_resnet50_fpn(pretrained=False,
+                                                                   pretrained_backbone=True,
+                                                                   num_keypoints=3,
+                                                                   num_classes = 2, # Background is the first class, object is the second class
+                                                                   rpn_anchor_generator=anchor_generator)
 
 
 #GETTING DATASET
@@ -90,13 +107,35 @@ checkpoint_dir = "save"
 checkpoint_path = checkpoint_dir+"/KeypointRCNN.pth"
 epochs = 10
 
+
+
+
+# construct an optimizer
+params = [p for p in model.parameters() if p.requires_grad]
+optimizer = torch.optim.SGD(
+                                params,
+                                lr=0.01, #TODO finetune
+                                momentum=0.1, 
+                                weight_decay=0.0005
+                                )  
+
+lr_scheduler = torch.optim.lr_scheduler.StepLR(
+    optimizer,
+    step_size=3, #TODO finetune
+    gamma=0.1 
+)
+
+
+
+
+
 train_loop(model = model, 
                train_dataloader = train_dataloader, 
                valid_dataloader = valid_dataloader, 
                device = device, 
                epochs = epochs, 
                checkpoint_path = checkpoint_path, 
-               optimizer=None,  
+               optimizer=optimizer,  
                lr_scheduler=None,
                use_scaler=False)
 
