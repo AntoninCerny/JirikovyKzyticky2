@@ -5,40 +5,25 @@ import torchvision
 from torchvision.models.detection import KeypointRCNN
 from torchvision.models.detection.anchor_utils import AnchorGenerator
 
-
-
-
 #imports for picture
 from PIL import Image
 import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-import matplotlib.patches as patches
-import matplotlib
+
 import numpy as np
 import os
-from cjm_pytorch_utils.core import move_data_to_device
-import torchvision.transforms as T
-
 
 
 #import dataset module
 from datasetModule import ClassDataset,tuple_batch
 from torch.utils.data import  DataLoader
 
-from cjm_pytorch_utils.core import set_seed, get_torch_device
+from cjm_pytorch_utils.core import get_torch_device
 
-fig, ax = plt.subplots()
-# Load the JPG file - thanks chat GPT
-img = Image.open('train/images/RgbImage_2022-05-10_09-05-11-png_2_png.rf.970d4724e63f03b4df10f1a33ab0559f.jpg')
-#img = imgRAW.convert('RGB')
-imgWidth, imgHeight  = img.size
+#import training core module
+from coreModule import train_loop
+#import plotting module function
+from plotPredictedResultModule import plot_prediction
 
-image_np = np.array(img)
-
-image_tensor = torch.from_numpy(image_np)
-image_tensor = image_tensor.permute(2, 0, 1)
-print(image_tensor.shape)
-image_tensor = image_tensor.float() / 255.0
 
 #get device
 #device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -101,52 +86,81 @@ valid_dataloader = DataLoader(valid_dataset, **data_loader_params)
 
 
 #CREATE TRAIN LOOP
+checkpoint_dir = "save"
+checkpoint_path = checkpoint_dir+"/KeypointRCNN.pth"
+epochs = 10
+
+train_loop(model = model, 
+               train_dataloader = train_dataloader, 
+               valid_dataloader = valid_dataloader, 
+               device = device, 
+               epochs = epochs, 
+               checkpoint_path = checkpoint_path, 
+               optimizer=None,  
+               lr_scheduler=None,
+               use_scaler=False)
 
 
 
-#
-# Get only the first image and target
-for images, targets in train_dataloader:
-    # Since batch_size=1, images and targets will each be a list of one element
-    MyImages = images[0]
-    MyTargets = targets[0]
-  
-    # Break after the first batch
-    break
 
 """
 
+#
+# Get only the first image and target
+
+for batch_id, (images, targets) in enumerate(train_dataloader):
+    # Since batch_size=1, images and targets will each be a list of one element
+    MyImages = images[0]
+    MyTargets = targets[0]
+    
+    # Break after the first batch
+    break
+    
+"""
+"""
 # Move the model and data to GPU if available
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 model.to(device)
 images = [img.to(device) for img in MyImages]
 targets = [{k: v.to(device) for k, v in t.items()} for t in MyTargets]
+
+"""
 """
 MyImages = MyImages.to(device)
 #MyTargets = MyTargets
-model.to(device)
+
 #trainingon one picture
 model.train()
 #trgt = getTarget()
 #trgt.to(device)
 """
+"""
 keypoint_rcnn_targets = [
             {'boxes' : boxes[None], 'labels': labels[None], 'keypoints': keypoints[None]}
             for boxes, labels, keypoints in zip(gt_object_bboxes, gt_labels, gt_keypoints_with_visibility)
         ]
+        """
 """
 MyImages = [MyImages]
 MyTargets = [MyTargets]
 
 model(MyImages,move_data_to_device(MyTargets, device))#move_data_to_device(trgt, device)
 
+"""
 
 
+#get sample image and make it a tensor
+sample_img_path = 'train/images/RgbImage_2022-05-10_09-05-11-png_2_png.rf.970d4724e63f03b4df10f1a33ab0559f.jpg'
+img = Image.open(sample_img_path)
+#img = imgRAW.convert('RGB')
+imgWidth, imgHeight  = img.size
 
+image_np = np.array(img)
 
-
-
-
+image_tensor = torch.from_numpy(image_np)
+image_tensor = image_tensor.permute(2, 0, 1)
+print(image_tensor.shape)
+image_tensor = image_tensor.float() / 255.0
 
 
 image_tensor = image_tensor.to(device)
@@ -158,3 +172,6 @@ model.eval()
 x = [image_tensor]
 predictions = model(x)
 print(predictions)
+
+
+plot_prediction(sample_img_path,predictions[0])
