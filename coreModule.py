@@ -35,18 +35,19 @@ def train_loop(model,
 
 
     scaler = torch.cuda.amp.GradScaler() if device == 'cuda' and use_scaler else None
-    #in the beginning i get worst posibble loss - even bad mode lgets saved on first
+    #in the beginning i get worst posibble loss - even bad model gets saved on first iter
     best_loss = float('inf') 
     # Loop over the epochs tqdm does cool counter in terminal 
     for epoch in tqdm(range(epochs), desc="Epochs"):
         # Run a training epoch and get the training loss
         train_loss = run_epoch(model, train_dataloader, optimizer, lr_scheduler, device, scaler, epoch, is_training=True)
         # Run an evaluation epoch and get the validation loss
+        # TODO create separate function for evaluation with better metric
         with torch.no_grad():
             valid_loss = run_epoch(model, valid_dataloader, None, None, device, scaler, epoch, is_training=False)
                 
         # model checkpoint - save .pth file and .json metadata  
-        # saving to the timestamp folder because i have overwritten really good model
+        # TODO saving to the timestamp folder because i have overwritten really good model
         if valid_loss < best_loss:
             best_loss = valid_loss
             #creates the .pth weight file
@@ -82,17 +83,15 @@ def run_epoch(model, dataloader, optimizer, lr_scheduler, device, scaler, epoch_
 
     current_epoch_loss = 0
     #optimizer and learning rate scheduler inspired by example torch vision
-    if epoch_id == 0 and is_training:
-        warmup_factor = 1.0 / 1000
-        warmup_iters = min(1000, len(dataloader) - 1)
-
+    if is_training:
         lr_scheduler = torch.optim.lr_scheduler.StepLR(
         optimizer,
-        step_size=100, #TODO finetune
-        gamma=0.9 
+        step_size=100, #TODO finetune - 100 is fine
+        gamma=0.9 # 0.9 is fine
         )
-    #cool progress bar in terminal
+    #progress bar in terminal
     progress_bar = tqdm(total=len(dataloader), desc="Train" if is_training else "Eval")
+
     for batch_id, (images, targets) in enumerate(dataloader):
         MyImage = images[0]
         MyTarget = targets[0]
@@ -135,8 +134,6 @@ def run_epoch(model, dataloader, optimizer, lr_scheduler, device, scaler, epoch_
                 # Gradient clipping because i kept crashing
                 clip_value = 0.5  #TODO fine tune
                 loss.backward()
-                
-                
                 utils.clip_grad_value_(model.parameters(), clip_value)
                 optimizer.step()
                 lr_scheduler.step()

@@ -5,14 +5,10 @@ import matplotlib.pyplot as plt
 
 def plot_prediction(image_path, prediction):
     """
-    Plot the original image with predicted bounding box and keypoints.
-
-    Parameters:
-    - image_path: Path to the input image.
-    - prediction: The prediction output from the keypoint RCNN model.
-                  Assumes prediction is a dictionary with keys 'boxes' and 'keypoints'.
-                  'boxes' should be a tensor of shape [N, 4].
-                  'keypoints' should be a tensor of shape [N, K, 3], where K is the number of keypoints.
+    
+    
+    
+    
     """
     # Load the image
     image = Image.open(image_path)
@@ -26,6 +22,7 @@ def plot_prediction(image_path, prediction):
     keypoints = prediction['keypoints'].to('cpu').detach().numpy()
     boxes = [boxes[1]]
     keypoints = [keypoints[1]]
+    #predicted_keypoints = (prediction['keypoints'][0])[:,:,:-1].reshape(-1,2)*1
     # Loop over each detected instance
     for box, kpts in zip(boxes, keypoints):
         # Draw the bounding box
@@ -38,5 +35,5 @@ def plot_prediction(image_path, prediction):
             ax.plot(x, y, 'bo')  # Blue dot for keypoints
             ax.text(x, y, f'{i}', color='yellow', fontsize=12)  # Optional: Label the keypoints
 
-    plt.axis('off')
+    #plt.axis('off')
     plt.show()

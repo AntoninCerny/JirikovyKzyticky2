@@ -24,7 +24,7 @@ model = torchvision.models.detection.keypointrcnn_resnet50_fpn(pretrained=False,
 model.load_state_dict(torch.load("save/keypointRCNN.pth"))
 
 
-sample_img_path = 'train/images/RgbImage_2022-05-10_09-05-11-png_2_png.rf.970d4724e63f03b4df10f1a33ab0559f.jpg'
+sample_img_path = 'train/images/RgbImage_2022-05-10_09-07-22-png_1_png.rf.40e74be554cce04b6ae0161313a445c1.jpg'
 img = Image.open(sample_img_path)
 #img = imgRAW.convert('RGB')
 imgWidth, imgHeight  = img.size

@@ -7,18 +7,18 @@ import os
 
 fig, ax = plt.subplots()
 # Load the JPG file - thanks chat GPT
-img = mpimg.imread('grain/images/RgbImage_2022-05-10_10-54-17-png_3_png.rf.50423efb3183be4b483150b59451fb37.jpg')
+img = mpimg.imread('train/images/RgbImage_2022-05-10_09-10-38-png_3_png.rf.3e90a0bb62fef89a6ed7696ecca878b0.jpg')
 imgHeight, imgWidth, _ = img.shape
 
 # Load txt file - thanks chat GPT
-with open('grain/labels/RgbImage_2022-05-10_10-54-17-png_3_png.rf.50423efb3183be4b483150b59451fb37.txt', 'r') as file:
+with open('train/labels/RgbImage_2022-05-10_09-10-38-png_3_png.rf.3e90a0bb62fef89a6ed7696ecca878b0.txt', 'r') as file:
     anotationDataString = file.read().split()
 anotationData = [float(x) for x in anotationDataString]
 
 
 #boundry rectangle 
 boundryBoxStartX = (imgWidth * anotationData[1]) - (imgWidth * anotationData[3])/2 #(middle of rectangel) - size/2 
-boundryBoxStartY = (imgHeight * anotationData[3]) + (imgHeight * anotationData[4])/2
+boundryBoxStartY = (imgHeight * anotationData[2]) - (imgHeight * anotationData[4])/2
 boundryBoxSizeX =  imgWidth * anotationData[3]
 boundryBoxSizeY = imgHeight * anotationData[4]
 
