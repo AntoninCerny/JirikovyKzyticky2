@@ -7,11 +7,11 @@ import os
 
 fig, ax = plt.subplots()
 # Load the JPG file - thanks chat GPT
-img = mpimg.imread('train/images/RgbImage_2022-05-10_09-10-38-png_3_png.rf.3e90a0bb62fef89a6ed7696ecca878b0.jpg')
+img = mpimg.imread('train/images/RgbImage_2022-05-10_10-45-24_png.rf.2b39fa5ae7c670c29d6c2492a26f3a30.jpg')
 imgHeight, imgWidth, _ = img.shape
 
 # Load txt file - thanks chat GPT
-with open('train/labels/RgbImage_2022-05-10_09-10-38-png_3_png.rf.3e90a0bb62fef89a6ed7696ecca878b0.txt', 'r') as file:
+with open('train/labels/RgbImage_2022-05-10_10-45-24_png.rf.2b39fa5ae7c670c29d6c2492a26f3a30.txt', 'r') as file:
     anotationDataString = file.read().split()
 anotationData = [float(x) for x in anotationDataString]
 
@@ -41,9 +41,9 @@ if anotationData[10] == 2:
 
     startingKeypoint = plt.scatter(startingKeypointX, startingKeypointY, color='red',s = 3)
 #bottom of the tree
-if anotationData[25] == 2:
-    startingKeypointX = imgWidth * anotationData[23]
-    startingKeypointY = imgHeight * anotationData[24]
+if anotationData[13] == 2:
+    startingKeypointX = imgWidth * anotationData[11]
+    startingKeypointY = imgHeight * anotationData[12]
 
     startingKeypoint = plt.scatter(startingKeypointX, startingKeypointY, color='red',s = 3)
 

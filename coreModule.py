@@ -31,9 +31,7 @@ def train_loop(model,
     """
      
 
-
-
-
+    #START inspired Christian Mills tutorial 
     scaler = torch.cuda.amp.GradScaler() if device == 'cuda' and use_scaler else None
     #in the beginning i get worst posibble loss - even bad model gets saved on first iter
     best_loss = float('inf') 
@@ -69,8 +67,11 @@ def train_loop(model,
     if device != 'cpu':
         getattr(torch, device).empty_cache()
     
+#STOP inspired Christian Mills tutorial
 
-
+#START inspired Christian Mills tutorial but completely redone 
+#acodring to Pytorch documentation
+#https://christianjmills.com/posts/pytorch-train-keypoint-rcnn-tutorial/
 
 
 def run_epoch(model, dataloader, optimizer, lr_scheduler, device, scaler, epoch_id, is_training):
@@ -86,7 +87,7 @@ def run_epoch(model, dataloader, optimizer, lr_scheduler, device, scaler, epoch_
     if is_training:
         lr_scheduler = torch.optim.lr_scheduler.StepLR(
         optimizer,
-        step_size=100, #TODO finetune - 100 is fine
+        step_size=50, #TODO finetune - 100 is fine
         gamma=0.9 # 0.9 is fine
         )
     #progress bar in terminal
@@ -132,7 +133,7 @@ def run_epoch(model, dataloader, optimizer, lr_scheduler, device, scaler, epoch_
                     lr_scheduler.step()
             else:
                 # Gradient clipping because i kept crashing
-                clip_value = 0.5  #TODO fine tune
+                clip_value = 1  #TODO fine tune
                 loss.backward()
                 utils.clip_grad_value_(model.parameters(), clip_value)
                 optimizer.step()
@@ -156,3 +157,4 @@ def run_epoch(model, dataloader, optimizer, lr_scheduler, device, scaler, epoch_
         
     progress_bar.close()
     return current_epoch_loss / (batch_id + 1)
+#STOP inspired Christian Mills tutorial

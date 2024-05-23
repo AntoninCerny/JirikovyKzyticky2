@@ -1,16 +1,11 @@
-#TODO delete imports
-import os, json, cv2, numpy as np, matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-
+import os
+import numpy as np
 import torch
-from torch.utils.data import Dataset, DataLoader
-
-
-from torchvision.transforms import functional as F
-
-
+from torch.utils.data import Dataset
 from PIL import Image
 
+#START inspired by Alex P from Medium but completely redone acording to Pytorch documentation
+#https://medium.com/@alexppppp/how-to-train-a-custom-keypoint-detection-model-with-pytorch-d9af90e111da
 
 class ClassDataset(Dataset):
    def __init__(self, root, transform=None, demo=False):              
@@ -56,8 +51,8 @@ class ClassDataset(Dataset):
             centerKeypointX = imgWidth * anotationData[8]
             centerKeypointY = imgHeight * anotationData[9]
 
-            topKeypointX = imgWidth * anotationData[23]
-            topKeypointY = imgHeight * anotationData[24]
+            topKeypointX = imgWidth * anotationData[11]
+            topKeypointY = imgHeight * anotationData[12]
 
             keypoints_original = [[[startingKeypointX,startingKeypointY,1],[centerKeypointX,centerKeypointY,1],[topKeypointX,topKeypointY,1]]]
 
@@ -94,3 +89,6 @@ class ClassDataset(Dataset):
         return len(self.imgs_files)
 def tuple_batch(batch):
     return tuple(zip(*batch))
+
+
+#STOP inspired by Alex P from Medium but completely redone acording to Pytorch documentation
